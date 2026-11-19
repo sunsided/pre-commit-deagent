@@ -27,7 +27,7 @@ Claude-Session: https://claude.ai/code/session_01AbCdEfGhJkMnPqRsTuVwXy
 ```
 
 Other agents commit with their own identity (`--author`, `git -c user.name=...`,
-`GIT_AUTHOR_NAME`) or skip signing (`--no-gpg-sign`). With this hook installed, the
+`GIT_AUTHOR_NAME`) or skip signing (`--no-gpg-sign`). With this hook installed, the first
 commit above becomes:
 
 ```text
