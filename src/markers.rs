@@ -41,15 +41,32 @@ pub fn is_agent_ident(ident: &str) -> bool {
         || (login.ends_with("[bot]") && AGENT_NAMES.iter().any(|n| login.contains(n)))
 }
 
+/// A session link at the start of `text`; links inside prose are left alone.
+fn starts_with_session_url(text: &str) -> bool {
+    let text = text.trim();
+    let text = text
+        .strip_prefix("https://")
+        .or_else(|| text.strip_prefix("http://"))
+        .unwrap_or(text);
+    SESSION_URLS.iter().any(|u| text.starts_with(u))
+}
+
 fn is_marker_line(line: &str) -> bool {
     let lower = line.trim().to_lowercase();
-    if let Some((key, value)) = lower.split_once(':')
-        && key.trim() == "co-authored-by"
-    {
-        return is_agent_ident(value);
-    }
-    if SESSION_URLS.iter().any(|u| lower.contains(u)) {
+    if starts_with_session_url(&lower) {
         return true;
+    }
+    // trailer: `Key: value`, key without whitespace
+    if let Some((key, value)) = lower.split_once(':')
+        && !key.is_empty()
+        && !key.contains(char::is_whitespace)
+    {
+        if key == "co-authored-by" {
+            return is_agent_ident(value);
+        }
+        if starts_with_session_url(value) {
+            return true;
+        }
     }
     // e.g. "🤖 Generated with [Claude Code](https://claude.com/claude-code)"
     let text = lower.trim_start_matches(|c: char| !c.is_alphanumeric());
@@ -107,6 +124,12 @@ mod tests {
         let (out, removed) = strip_markers(msg);
         assert_eq!(out, "Split crates\n\nBody.\n");
         assert_eq!(removed.len(), 2);
+    }
+
+    #[test]
+    fn keeps_session_links_in_prose() {
+        let msg = "Cover trailer\n\nadds a Claude-Session: https://claude.ai/code/session_... trailer.\nSee https://claude.ai/code/ for details.\n";
+        assert_eq!(strip_markers(msg), (msg.to_string(), vec![]));
     }
 
     #[test]

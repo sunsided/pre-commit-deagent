@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- Session links are only treated as markers on their own line or as a trailer value
+  (`Claude-Session: https://claude.ai/code/...`). Lines that mention a link in prose are kept.
+
 ## [0.1.1] - 2026-11-19
 
 ### Changed
