@@ -103,7 +103,7 @@ default_install_hook_types: [pre-commit, post-commit, pre-push]
 
 repos:
   - repo: https://github.com/sunsided/pre-commit-deagent
-    rev: v0.1.0
+    rev: v0.1.1
     hooks:
       - id: deagent
       - id: deagent-check

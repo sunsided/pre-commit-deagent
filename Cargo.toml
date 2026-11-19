@@ -1,6 +1,6 @@
 [package]
 name = "pre-commit-deagent"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 description = "pre-commit / prek hook that strips AI coding agent trailers and session links from commits, resets the author and signs"
 authors = ["Markus Mayer <github@widemeadows.de>"]
