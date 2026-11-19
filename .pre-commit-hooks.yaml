@@ -1,0 +1,17 @@
+- id: deagent
+  name: deagent (strip AI agent markers, reset author, sign)
+  description: Rewrites HEAD to drop AI agent co-author trailers and session links, use your git identity and sign the commit.
+  entry: pre-commit-deagent fix
+  language: rust
+  stages: [post-commit]
+  always_run: true
+  pass_filenames: false
+  verbose: true
+- id: deagent-check
+  name: deagent check (reject AI agent markers)
+  description: Fails if commits being pushed carry AI agent trailers, session links or agent identities.
+  entry: pre-commit-deagent check
+  language: rust
+  stages: [pre-push, manual]
+  always_run: true
+  pass_filenames: false

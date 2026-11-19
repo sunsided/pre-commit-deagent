@@ -1,0 +1,13 @@
+[package]
+name = "pre-commit-deagent"
+version = "0.1.0"
+edition = "2024"
+description = "pre-commit / prek hook that strips AI coding agent trailers and session links from commits, resets the author and signs"
+authors = ["Markus Mayer <github@widemeadows.de>"]
+repository = "https://github.com/sunsided/pre-commit-deagent"
+keywords = ["git", "pre-commit", "prek", "hook", "ai"]
+categories = ["command-line-utilities", "development-tools"]
+license = "EUPL-1.2"
+readme = "README.md"
+
+[dependencies]
