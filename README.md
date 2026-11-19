@@ -74,7 +74,7 @@ identity and signing settings are read with the agent's overrides removed:
 
 The rewrite uses `git commit-tree` and `git update-ref` instead of `git commit --amend`.
 Your index and any other staged changes stay as they are, no hooks run again, and the
-original author date is kept. The old commit stays reachable in `git reflog` as
+original author and committer timestamps are kept. The old commit stays reachable in `git reflog` as
 `deagent: rewrite agent commit`.
 
 The hook does **not** rewrite, and reports instead, when:
@@ -123,6 +123,8 @@ hook explicitly with `prek install -t post-commit`.
 ### Signing
 
 `deagent` signs with whatever git is configured to use (`gpg.format`, `user.signingkey`).
+Signing counts as configured when `user.signingkey` is set or `commit.gpgsign` is `true`.
+Otherwise the rewritten commit is unsigned, and any signature the agent added is dropped.
 Example for SSH signing:
 
 ```shell

@@ -79,6 +79,8 @@ struct Commit {
     /// `<unix-seconds> <tz>`
     author_date: String,
     committer: String,
+    /// `<unix-seconds> <tz>`
+    committer_date: String,
     signed: bool,
     message: String,
 }
@@ -92,6 +94,7 @@ fn read_commit(rev: &str) -> Result<Commit, String> {
         author: String::new(),
         author_date: String::new(),
         committer: String::new(),
+        committer_date: String::new(),
         signed: false,
         message: message.to_string(),
     };
@@ -101,7 +104,7 @@ fn read_commit(rev: &str) -> Result<Commit, String> {
             "tree" => c.tree = value.into(),
             "parent" => c.parents.push(value.into()),
             "author" => (c.author, c.author_date) = split_ident(value),
-            "committer" => c.committer = split_ident(value).0,
+            "committer" => (c.committer, c.committer_date) = split_ident(value),
             "gpgsig" | "gpgsig-sha256" => c.signed = true,
             "encoding" if !value.eq_ignore_ascii_case("utf-8") => {
                 return Err(format!("commit uses encoding {value}, not touching it"));
@@ -118,6 +121,12 @@ fn split_ident(value: &str) -> (String, String) {
         Some(i) => (value[..=i].into(), value[i + 1..].trim().into()),
         None => (value.into(), String::new()),
     }
+}
+
+/// Split `Name <email>` into (`Name`, `email`).
+fn split_name_email(ident: &str) -> (&str, &str) {
+    let (name, email) = ident.split_once(" <").unwrap_or((ident, ""));
+    (name, email.trim_end_matches('>'))
 }
 
 fn fix() -> Result<bool, String> {
@@ -186,9 +195,8 @@ fn fix() -> Result<bool, String> {
     for p in &commit.parents {
         cmd.args(["-p", p]);
     }
-    if sign {
-        cmd.arg("-S");
-    }
+    // without signing configured, commit unsigned even if the original carried a signature
+    cmd.arg(if sign { "-S" } else { "--no-gpg-sign" });
     match &identity {
         Some((name, email, _)) => {
             cmd.env("GIT_AUTHOR_NAME", name)
@@ -197,15 +205,16 @@ fn fix() -> Result<bool, String> {
                 .env("GIT_COMMITTER_EMAIL", email);
         }
         None => {
-            let (name, email) = commit
-                .author
-                .split_once(" <")
-                .unwrap_or((&commit.author, ""));
+            let (name, email) = split_name_email(&commit.author);
             cmd.env("GIT_AUTHOR_NAME", name)
-                .env("GIT_AUTHOR_EMAIL", email.trim_end_matches('>'));
+                .env("GIT_AUTHOR_EMAIL", email);
+            let (name, email) = split_name_email(&commit.committer);
+            cmd.env("GIT_COMMITTER_NAME", name)
+                .env("GIT_COMMITTER_EMAIL", email);
         }
     }
-    cmd.env("GIT_AUTHOR_DATE", format!("@{}", commit.author_date));
+    cmd.env("GIT_AUTHOR_DATE", format!("@{}", commit.author_date))
+        .env("GIT_COMMITTER_DATE", format!("@{}", commit.committer_date));
     let mut child = cmd
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
