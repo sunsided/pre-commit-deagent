@@ -163,6 +163,16 @@ fn fix() -> Result<bool, String> {
     if reasons.is_empty() {
         return Ok(true);
     }
+    if !sign {
+        let dropped = if commit.signed {
+            ", original signature dropped"
+        } else {
+            ""
+        };
+        reasons.push(format!(
+            "unsigned: no user.signingkey or commit.gpgsign configured{dropped}"
+        ));
+    }
     for line in &removed {
         eprintln!("deagent: - {line}");
     }

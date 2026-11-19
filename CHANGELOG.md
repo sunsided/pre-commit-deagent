@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Rewritten commits keep the original committer timestamp, not only the author timestamp.
-- Without signing configured, rewritten commits are explicitly unsigned (`--no-gpg-sign`).
+- Without signing configured, rewritten commits are explicitly unsigned (`--no-gpg-sign`)
+  and the hook says so on stderr.
 
 ## [0.1.0] - 2026-11-19
 
